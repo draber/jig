@@ -1,0 +1,19 @@
+{
+    "name": "draber/jig",
+    "type": "library",
+    "description": "Jig PHP Utilities",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dieter Raber",
+            "email": "me@dieterraber.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": { "Jig\\": "src/" }
+    }
+}

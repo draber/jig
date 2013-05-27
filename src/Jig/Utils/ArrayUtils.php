@@ -108,5 +108,24 @@ class ArrayUtils {
     }
     return $pivot;
   }
+  
+  /**
+   * Pick works very much like pop() or shift() but gets data from any key of the 
+   * array. It also works with associative keys
+   * 
+   * @param array $array
+   * @param type $wantedKey
+   * @return array
+   */
+  public static function pick(array &$array, $wantedKey) {
+    $returnVal = [];
+    foreach($array as $key => $value) {
+      if($key === $wantedKey) {
+        $returnVal = $value;
+      }
+    }
+    unset($array[$wantedKey]);
+    return $returnVal;
+  }
 
 }

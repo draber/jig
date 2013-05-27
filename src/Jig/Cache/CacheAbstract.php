@@ -28,12 +28,16 @@ class CacheAbstract {
   protected static function unserialize($data, $expirationCallback=null) {
 
     $data = json_decode($data, true);
-    if ($data['base64']) {
-      $data['content'] = base64_decode($data['content']);
-    }
+    
     if($expirationCallback && $data['expires'] < time()){
       $expirationCallback();
+      $data['content'] = false;
     }
+    
+    if ($data['content'] && $data['base64']) {
+      $data['content'] = base64_decode($data['content']);
+    }
+    
     return $data['content'];
   }
 
@@ -61,7 +65,7 @@ class CacheAbstract {
         throw new JigException('Invalid duration ' . $duration . ', caching not possible');
     }
     $base64 = false;
-    if (StringUtils::isBinary($data)) {
+    if (is_string($data) && StringUtils::isBinary($data)) {
       $data   = base64_encode($data);
       $base64 = true;
     }

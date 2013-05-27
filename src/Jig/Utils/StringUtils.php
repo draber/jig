@@ -137,10 +137,11 @@ class StringUtils {
    * @param string $string
    * @return string
    */
-  public static function camelize($string) {
+  public static function camelize($string, $firstToUpper=false) {
     $string = 'x' . strtolower(trim($string));
     $string = ucwords(preg_replace('/[\s_]+/', ' ', $string));
-    return substr(str_replace(' ', '', $string), 1);
+    $string = substr(str_replace(' ', '', $string), 1);
+    return $firstToUpper ? ucfirst($string) : $string;
   }
 
   /**
@@ -210,6 +211,34 @@ class StringUtils {
         return $value;
     }
       
+  }
+  
+  /**
+   * Encodes text randomly to html entities of different styles
+   * This code comes from Symfony 1.4
+   * 
+   * @param string $text
+   * @return string
+   */
+  protected static function encodeText($text){
+    $encoded_text = '';  
+    for ($i = 0; $i < strlen($text); $i++) {
+      $char = $text{$i};
+      $r = rand(0, 100);
+  
+      # roughly 10% raw, 45% hex, 45% dec
+      # '@' *must* be encoded. I insist.
+      if ($r > 90 && $char != '@') {
+        $encoded_text .= $char;
+      }
+      else if ($r < 45) {
+        $encoded_text .= '&#x'.dechex(ord($char)).';';
+      }
+      else  {
+        $encoded_text .= '&#'.ord($char).';';
+      }
+    }  
+    return $encoded_text;
   }
 
 }

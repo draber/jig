@@ -1,23 +1,70 @@
 <?php
 
+/**
+ * Copyright (c) 06-May-2013 Dieter Raber <me@dieterraber.net>
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to 
+ * deal in the Software without restriction, including without limitation the 
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+ * sell copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/**
+ * Gettext
+ *
+ * @author Dieter Raber <me@dieterraber.net>
+ */
 namespace Jig\I18n;
 
+/**
+ * Generates the locale from either _GET, _POST, _COOKIE or _SESSION.
+ * Language in this context is defined as in ISO 639-1, countries as
+ * in ISO 3166-1. It can in-/output the locales in the formats en and en_GB.
+ * If no country is found in the data submitted the default country as found
+ * in self::getDefaultCountry is used
+ * 
+ * @see self::getDefaultCountry
+ */
 class LocaleHandler {
   
   /**
-   * Configuration defaults
+   * <code>
+   * // Configuration defaults
+   * $settings = [
+   *  'available' => ['fr', 'en', 'de'], // could be also something like [en_GB...]
+   *  'default' => 'fr',                 // same here
+   *  'key' => 'locale',                 // the key used in _COOKIE etc.
+   *  'precedence' => ['get', 'post', 'cookie', 'session'],
+   *  'cookie-path' => '/',              // for which path to set the cookie
+   *  'save-locale' => true,             // save the loacle in a cookie
+   *  'force-locale' => null             // forces the locale to be the value of this key
+   * ]
+   * </code>
    * 
    * @var array 
    */
-  private $settings = array(
-      'available' => array('fr', 'en', 'de'),
+  private $settings = [
+      'available' => ['fr', 'en', 'de'],
       'default' => 'fr',
       'key' => 'locale',
-      'precedence' => array('get', 'post', 'cookie', 'session'),
+      'precedence' => ['get', 'post', 'cookie', 'session'],
       'cookie-path' => '/',
       'save-locale' => true,
       'force-locale' => null
-  );
+  ];
   
   /**
    * Locale in the form fr_FR
@@ -46,14 +93,15 @@ class LocaleHandler {
   public function __construct(array $settings = array()) {
     $this -> settings = array_merge($this -> settings, $settings);
     foreach($this -> settings['available'] as $key => $value) {
-      $this -> settings['available-locale'][$key] = $this -> harmonize($value);
-      $this -> settings['available-lang'][$key] = substr($value, 0, 2);
+      $this -> settings['available-locales'][$key] = $this -> harmonize($value);
+      $this -> settings['available-langs'][$key] = substr($value, 0, 2);
     }
-    $this -> settings['default'] = $this -> harmonize($this -> settings['default']);
+    // @TODO speedy delete, does this cause any trouble?
+    //$this -> settings['default'] = $this -> harmonize($this -> settings['default']);
     unset($this -> settings['available']);
     $this -> locale = !empty($this -> settings['force-locale']) 
-                              ? $this -> harmonize($this -> settings['force-locale'])
-                              : $this -> buildLocale();
+                    ? $this -> harmonize($this -> settings['force-locale'])
+                    : $this -> buildLocale();
     $this -> language = substr($this -> locale, 0, 2);
     $this -> country = strlen($this -> locale) === 5 ? strtoupper(substr($this -> locale, -2))
               : $this -> getDefaultCountry($this -> language);
@@ -64,6 +112,7 @@ class LocaleHandler {
 
 
   /**
+   * Assigns a default country in case none has been suppied to the class
    * 
    * @param string $lang
    * @return string
@@ -149,8 +198,8 @@ class LocaleHandler {
    * 
    * @return string 
    */
-  public function getLocale() {
-    return $this -> locale;
+  public function getLocale($asUrlFragment=false) {
+    return  $asUrlFragment ? str_replace('_', '-', strtolower($this -> locale)) : $this -> locale;
   }
 
   
@@ -179,8 +228,18 @@ class LocaleHandler {
    * 
    * @return string 
    */
-  public function getDefaultLocale() {
-    return $this -> settings['default'];
+  public function getDefaultLocale($asUrlFragment=false) {
+    return $asUrlFragment ? str_replace('_', '-', strtolower($this -> settings['default'])) : $this -> settings['default'];
+  } 
+  
+  
+  /**
+   * Get the locale in the form fr_FR
+   * 
+   * @return string 
+   */
+  public function getAvailableLocales() {
+    return $this -> settings['available-locales'];
   }
 
   
@@ -206,8 +265,8 @@ class LocaleHandler {
           break;
       }
       if(isset($lookup) && !empty($lookup[$this -> settings['key']])
-              && (in_array($lookup[$this -> settings['key']], $this -> settings['available-locale'])
-              || in_array($lookup[$this -> settings['key']], $this -> settings['available-lang']))
+              && (in_array($lookup[$this -> settings['key']], $this -> settings['available-locales'])
+              || in_array($lookup[$this -> settings['key']], $this -> settings['available-langs']))
       ) {
         return $this -> harmonize($lookup[$this -> settings['key']]);
       }

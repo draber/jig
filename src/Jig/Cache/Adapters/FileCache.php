@@ -15,7 +15,7 @@ use Jig\Cache\CacheAbstract;
 use Jig\Cache\Interfaces\CacheInterface;
 
 /**
- * FileCache
+ * FileCache. Uses JSON files as storage
  */
 class FileCache extends CacheAbstract implements CacheInterface {
 
@@ -28,16 +28,16 @@ class FileCache extends CacheAbstract implements CacheInterface {
     if (!is_readable($cacheFilePath)) {
       return false;
     }
-
+    
     $expirationCallback = function() use ($cacheFilePath){
-      unlink($cacheFilePath);
+      self::delete($cacheFilePath);
     };
     
     return self::unserialize(file_get_contents($cacheFilePath), $expirationCallback);
   }
 
   /**
-   * Write a resource to the a file
+   * Writes a resource to the cache, paths will ge created if applicable
    * 
    * @param type $cacheFilePath
    * @param mixed $data
@@ -51,5 +51,16 @@ class FileCache extends CacheAbstract implements CacheInterface {
     }
     return file_put_contents($cacheFilePath, $data);
   }
-
+  
+  /**
+   * Delete a cache file. This can also be used to delete a file before its
+   * actual expiration.
+   * 
+   * @param type $cacheFilePath
+   */
+  public static function delete($cacheFilePath) {
+    if(is_file($cacheFilePath)) {
+      unlink($cacheFilePath);
+    }
+  }
 }

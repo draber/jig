@@ -85,7 +85,7 @@ class ServerUtils {
    */
   public static function redirect($path = '') {
 
-    $redirection = 'http://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($path, '/');
+    $redirection = self::getProtocol() . '://' . $_SERVER['HTTP_HOST'] . '/' . ltrim($path, '/');
     if (self::getScriptUri(true) === $redirection) {
       return false;
     }
