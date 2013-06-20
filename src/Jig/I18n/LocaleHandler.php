@@ -258,6 +258,8 @@ class LocaleHandler {
           $lookup = $_COOKIE;
           break;
         case 'post':
+        case 'put':
+        case 'delete':
           $lookup = $_POST;
           break;
         case 'session':

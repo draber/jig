@@ -159,6 +159,11 @@ class Element {
   }  
   
   public function __call($element, $arguments=array()) {
+    
+    if($element === 'input' && !empty($arguments[0]['type']) && $arguments[0]['type'] === 'textarea'){
+      unset($arguments[0]['type']);
+      $element = 'textarea';
+    }
 
     $arguments[1]['element'] = $element;
 
